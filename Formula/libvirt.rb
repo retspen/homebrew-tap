@@ -1,9 +1,10 @@
 class Libvirt < Formula
   desc "C virtualization API"
-  homepage "https://www.libvirt.org"
-  url "https://libvirt.org/sources/libvirt-7.6.0.tar.xz"
-  sha256 "8f967106d00aabb3cd692724bdd4a9c09e71cb2245053b98193690ee01766141"
+  homepage "https://libvirt.org/"
+  url "https://libvirt.org/sources/libvirt-8.0.0.tar.xz"
+  sha256 "51e6e8ff04bafe96d7e314b213dcd41fb1163d9b4f0f75cdab01e663728f4cf6"
   license all_of: ["LGPL-2.1-or-later", "GPL-2.0-or-later"]
+  head "https://gitlab.com/libvirt/libvirt.git", branch: "master"
 
   livecheck do
     url "https://libvirt.org/sources/"
@@ -11,17 +12,14 @@ class Libvirt < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 arm64_big_sur: "8f86ccc81d09112ce826c382bfefb74880c9dabfe186b9c83bf6d935eba1611d"
-    sha256 big_sur:       "5bd53310057ed0d72695cb176005bc8ad1bb320f4cb67c9b74cb1a2582631103"
-    sha256 catalina:      "dd979706fd043654f4393ee331607c325df0ca0012b3eecc8579223cbbd53bfd"
-    sha256 mojave:        "ba7df55e6bcb315e6ab46111a1e4a0824ab72c44888cd01f2d4821860f163dd3"
-    sha256 x86_64_linux:  "e31b155ea6e7e306875c78d43e28828ebc01b5a5210fd0a1bacbbf271a6f30dd"
+    sha256 arm64_monterey: "dc408ef9e5679856b0c3a3200cd9c16c5c7ba270018de1472a8650344c6c5479"
+    sha256 arm64_big_sur:  "02359e449d7c2d19ff52ff3258679e1f07c79685fa91f3962104b8267f2c2369"
+    sha256 monterey:       "b80fe11b75c15cd46f5aa39e31e9523ef958734a75420e2b19fb7c8814d030dd"
+    sha256 big_sur:        "96d763827e880a7100e79283e5e16b2aa6d575b63c7707b290d8536f4530ee78"
+    sha256 catalina:       "7f691a6378bef0e100e2b0ae200f2dec72d9d8bffb09595f506a47d1e11f7756"
+    sha256 x86_64_linux:   "0e2b445c7794db793d58fbb651cbce64fd6753ad4cde88b23b5bf4a3ad116bc8"
   end
 
-  head do
-    url "https://github.com/libvirt/libvirt.git"
-  end
   depends_on "docutils" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
@@ -47,6 +45,33 @@ class Libvirt < Formula
 
   on_linux do
     depends_on "libtirpc"
+    depends_on "linux-headers@5.16"
+  end
+
+  # Don't generate accelerator command line on macOS
+  #
+  # This makes it once again possible to use the
+  #
+  #   <qemu:commandline>
+  #     <qemu:arg value='-machine'/>
+  #     <qemu:arg value='q35,accel=hvf'/>
+  #   </qemu:commandline>
+  #
+  # workaround to enable hardware acceleration.
+  #
+  # Drop once proper HVF support is added to libvirt.
+  #
+  # https://gitlab.com/libvirt/libvirt/-/issues/147
+  patch do
+    url "https://gitlab.com/abologna/libvirt/-/commit/da138afc3609a92d473fddcffa54b2020759f986.diff"
+    sha256 "4eb3c9f0ca140a4d8eb5002acde0b6f1234011f82df7d8cc85252be35e8a5cff"
+  end
+
+  # Fix PermissionError: [Errno 1] Operation not permitted: '/usr/local/Cellar/yajl/2.1.0/include/libvirt'
+  # Remove with next release
+  patch do
+    url "https://gitlab.com/libvirt/libvirt/-/commit/9f2d3cb472fd4d86dc4de5d57fcf8acb14e33e00.diff"
+    sha256 "ee14a4922ddc405c6ff6c5f7e9183b83f50cfa448b2ab9e1428f3f1c47e0d34c"
   end
 
   def install
@@ -55,8 +80,11 @@ class Libvirt < Formula
         --localstatedir=#{var}
         --mandir=#{man}
         --sysconfdir=#{etc}
+        -Ddriver_esx=enabled
         -Ddriver_qemu=enabled
+        -Ddriver_network=enabled
         -Dinit_script=none
+        -Dqemu_datadir=#{Formula["qemu"].opt_pkgshare}
       ]
       system "meson", *std_meson_args, *args, ".."
       system "meson", "compile"
