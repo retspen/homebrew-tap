@@ -13,7 +13,7 @@ class Libvirt < Formula
 
   bottle do
     root_url "https://github.com/retspen/homebrew-tap/releases/download/libvirt-10.10.0"
-    sha256 arm64_tahoe: "15426fa6e8f2cd3a47712c3c03a459d8f2f5d61ba25e7efb914bcef4df160175"
+    sha256 arm64_tahoe: "3eb6871e9abc534bfe5764d8b60064dd676f1435ba6887eea8c667fb4208ecf5"
   end
   
   depends_on "docutils" => :build
