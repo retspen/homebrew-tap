@@ -11,6 +11,13 @@ class Libvirt < Formula
     regex(/href=.*?libvirt[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
+  bottle do
+    sha256 arm64_tahoe: "15426fa6e8f2cd3a47712c3c03a459d8f2f5d61ba25e7efb914bcef4df160175"
+    sha256 arm64_sequoia: "15426fa6e8f2cd3a47712c3c03a459d8f2f5d61ba25e7efb914bcef4df160175"
+    sha256 arm64_sonoma:  "2b4fd22a9da0135432d0b90f4f14b9ca2606471dc104e665994cfb64fc148863"
+    sha256 arm64_ventura: "ba956771e23c62aab80c6ea5726183f83a8626b70db1b6532201204a8f12d4a9"
+  end
+  
   depends_on "docutils" => :build
   depends_on "gettext" => :build
   depends_on "meson" => :build
