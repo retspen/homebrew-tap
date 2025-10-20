@@ -30,9 +30,6 @@ class Libvirt < Formula
   uses_from_macos "curl"
   uses_from_macos "libxml2"
   uses_from_macos "libxslt"
-
-  uses_from_macos "curl"
-  uses_from_macos "libxslt"
   
   on_macos do
     depends_on "gettext"
