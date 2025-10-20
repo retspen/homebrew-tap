@@ -1,3 +1,9 @@
-# Homebrew Libvirt 
+# Homebrew Libvirt 10.10
 
-Libvrit 8.0.0 formula for the Homebrew package manager.
+## How to install
+
+```bash
+$ brew tap retspen/tap
+$ brew update
+$ brew install retspen/tap/libvirt
+```
