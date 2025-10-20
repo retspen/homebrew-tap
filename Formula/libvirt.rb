@@ -1,23 +1,21 @@
 class Libvirt < Formula
   desc "C virtualization API"
   homepage "https://libvirt.org/"
-  url "https://libvirt.org/sources/libvirt-8.0.0.tar.xz"
-  sha256 "51e6e8ff04bafe96d7e314b213dcd41fb1163d9b4f0f75cdab01e663728f4cf6"
+  url "https://download.libvirt.org/libvirt-9.10.0.tar.xz"
+  sha256 "1060afc0e85a84c579bcdc91cfaf6d471918f97a780f04c5260a034ff7db7519"
   license all_of: ["LGPL-2.1-or-later", "GPL-2.0-or-later"]
   head "https://gitlab.com/libvirt/libvirt.git", branch: "master"
 
   livecheck do
-    url "https://libvirt.org/sources/"
+    url "https://download.libvirt.org"
     regex(/href=.*?libvirt[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 arm64_monterey: "dc408ef9e5679856b0c3a3200cd9c16c5c7ba270018de1472a8650344c6c5479"
-    sha256 arm64_big_sur:  "02359e449d7c2d19ff52ff3258679e1f07c79685fa91f3962104b8267f2c2369"
-    sha256 monterey:       "b80fe11b75c15cd46f5aa39e31e9523ef958734a75420e2b19fb7c8814d030dd"
-    sha256 big_sur:        "96d763827e880a7100e79283e5e16b2aa6d575b63c7707b290d8536f4530ee78"
-    sha256 catalina:       "7f691a6378bef0e100e2b0ae200f2dec72d9d8bffb09595f506a47d1e11f7756"
-    sha256 x86_64_linux:   "0e2b445c7794db793d58fbb651cbce64fd6753ad4cde88b23b5bf4a3ad116bc8"
+    sha256 arm64_tahoe:    "1060afc0e85a84c579bcdc91cfaf6d471918f97a780f04c5260a034ff7db7519"
+    sha256 arm64_sonoma:   "647f1debd7e613806fb032f7280f0a77778417af878b3e2b3fd89ad147fa974d"
+    sha256 arm64_ventura:  "233a0dfb5ca7b6db97a9b551bba30fb50cae4083ddc16bcc834ab48747025caf"
+    sha256 arm64_monterey: "3ac4ff7a0c7d841433012f0ce129f5e10121e2e3f9e4029dd22974cf98a96fb2"
   end
 
   depends_on "docutils" => :build
@@ -25,7 +23,7 @@ class Libvirt < Formula
   depends_on "ninja" => :build
   depends_on "perl" => :build
   depends_on "pkg-config" => :build
-  depends_on "python@3.9" => :build
+  depends_on "python@3.11" => :build
   depends_on "gettext"
   depends_on "glib"
   depends_on "gnu-sed"
@@ -34,6 +32,7 @@ class Libvirt < Formula
   depends_on "libgcrypt"
   depends_on "libiscsi"
   depends_on "libssh2"
+  depends_on "readline" # Possible opportunistic linkage. TODO: Check if this can be removed.
   depends_on "yajl"
 
   uses_from_macos "curl"
@@ -45,51 +44,24 @@ class Libvirt < Formula
 
   on_linux do
     depends_on "libtirpc"
-    depends_on "linux-headers@5.16"
   end
 
-  # Don't generate accelerator command line on macOS
-  #
-  # This makes it once again possible to use the
-  #
-  #   <qemu:commandline>
-  #     <qemu:arg value='-machine'/>
-  #     <qemu:arg value='q35,accel=hvf'/>
-  #   </qemu:commandline>
-  #
-  # workaround to enable hardware acceleration.
-  #
-  # Drop once proper HVF support is added to libvirt.
-  #
-  # https://gitlab.com/libvirt/libvirt/-/issues/147
-  patch do
-    url "https://gitlab.com/abologna/libvirt/-/commit/da138afc3609a92d473fddcffa54b2020759f986.diff"
-    sha256 "4eb3c9f0ca140a4d8eb5002acde0b6f1234011f82df7d8cc85252be35e8a5cff"
-  end
-
-  # Fix PermissionError: [Errno 1] Operation not permitted: '/usr/local/Cellar/yajl/2.1.0/include/libvirt'
-  # Remove with next release
-  patch do
-    url "https://gitlab.com/libvirt/libvirt/-/commit/9f2d3cb472fd4d86dc4de5d57fcf8acb14e33e00.diff"
-    sha256 "ee14a4922ddc405c6ff6c5f7e9183b83f50cfa448b2ab9e1428f3f1c47e0d34c"
-  end
+  fails_with gcc: "5"
 
   def install
-    mkdir "build" do
-      args = %W[
-        --localstatedir=#{var}
-        --mandir=#{man}
-        --sysconfdir=#{etc}
-        -Ddriver_esx=enabled
-        -Ddriver_qemu=enabled
-        -Ddriver_network=enabled
-        -Dinit_script=none
-        -Dqemu_datadir=#{Formula["qemu"].opt_pkgshare}
-      ]
-      system "meson", *std_meson_args, *args, ".."
-      system "meson", "compile"
-      system "meson", "install"
-    end
+    args = %W[
+      --localstatedir=#{var}
+      --mandir=#{man}
+      --sysconfdir=#{etc}
+      -Ddriver_esx=enabled
+      -Ddriver_qemu=enabled
+      -Ddriver_network=enabled
+      -Dinit_script=none
+      -Dqemu_datadir=#{Formula["qemu"].opt_pkgshare}
+    ]
+    system "meson", "setup", "build", *args, *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   service do
