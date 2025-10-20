@@ -38,9 +38,9 @@ class Libvirt < Formula
   uses_from_macos "curl"
   uses_from_macos "libxslt"
 
-  on_macos do
-    depends_on "rpcgen" => :build
-  end
+  # on_macos do
+  #   depends_on "rpcgen" => :build
+  # end
 
   on_linux do
     depends_on "libtirpc"
