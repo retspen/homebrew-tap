@@ -11,42 +11,32 @@ class Libvirt < Formula
     regex(/href=.*?libvirt[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
-  # bottle do
-  #   sha256 arm64_tahoe:    "1060afc0e85a84c579bcdc91cfaf6d471918f97a780f04c5260a034ff7db7519"
-  #   sha256 arm64_sonoma:   "647f1debd7e613806fb032f7280f0a77778417af878b3e2b3fd89ad147fa974d"
-  #   sha256 arm64_ventura:  "233a0dfb5ca7b6db97a9b551bba30fb50cae4083ddc16bcc834ab48747025caf"
-  #   sha256 arm64_monterey: "3ac4ff7a0c7d841433012f0ce129f5e10121e2e3f9e4029dd22974cf98a96fb2"
-  # end
-
   depends_on "docutils" => :build
+  depends_on "gettext" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "perl" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.11" => :build
-  depends_on "gettext"
+  depends_on "pkgconf" => :build
+
   depends_on "glib"
-  depends_on "gnu-sed"
   depends_on "gnutls"
-  depends_on "grep"
+  depends_on "json-c"
   depends_on "libgcrypt"
   depends_on "libiscsi"
   depends_on "libssh2"
   depends_on "readline" # Possible opportunistic linkage. TODO: Check if this can be removed.
   depends_on "yajl"
 
+  uses_from_macos "perl" => :build
   uses_from_macos "curl"
+  uses_from_macos "libxml2"
   uses_from_macos "libxslt"
 
-  # on_macos do
-  #   depends_on "rpcgen" => :build
-  # end
-
-  on_linux do
-    depends_on "libtirpc"
+  uses_from_macos "curl"
+  uses_from_macos "libxslt"
+  
+  on_macos do
+    depends_on "gettext"
   end
-
-  fails_with gcc: "5"
 
   def install
     args = %W[
